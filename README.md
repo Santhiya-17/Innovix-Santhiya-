@@ -42,4 +42,47 @@ Developed for **Hackathon 2026** using **Python Flask**, **HTML/CSS/Tailwind**, 
 - **Version Control:** Git & GitHub  
 
 ---
+Installation
 
+Follow these steps to run the project locally:
+
+Clone the repository
+
+git clone https://github.com/Santhiya-17/Innovix-Santhiya-.git
+
+
+Navigate into the project folder
+
+cd Innovix
+
+Create a virtual environment
+
+python -m venv venv
+
+
+Activate the virtual environment
+
+On Windows:
+
+venv\Scripts\activate
+
+
+On Linux/Mac:
+
+source venv/bin/activate
+
+
+Install the required Python packages
+
+pip install -r requirements.txt
+
+
+Run the Flask application
+
+python app.py
+
+
+Open the app in your browser
+Go to:
+
+http://127.0.0.1:5000/
