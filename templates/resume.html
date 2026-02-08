@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            padding: 40px;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+        h1 {
+            color: #6c3cff;
+        }
+        .form-group {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+        input[type="file"], select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 25px;
+            padding: 12px 20px;
+            background: #6c3cff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5930d1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Upload Your Resume</h1>
+    <form action="/review_resume" method="POST" enctype="multipart/form-data">
+
+        <!-- Target Role -->
+        <div class="form-group">
+            <label for="target_role">Select Target Role</label>
+            <select name="target_role" id="target_role" required>
+                <option value="">-- Select Role --</option>
+                <option value="Software Developer">Software Developer</option>
+                <option value="Web Developer">Web Developer</option>
+                <option value="Mobile App Developer">Mobile App Developer</option>
+                <option value="Data Analyst / Data Scientist">Data Analyst / Data Scientist</option>
+                <option value="AI / ML Engineer">AI / ML Engineer</option>
+                <option value="Cyber Security Engineer">Cyber Security Engineer</option>
+                <option value="UI/UX Designer">UI/UX Designer</option>
+                <option value="Product / Business Analyst">Product / Business Analyst</option>
+                <option value="Cloud / DevOps Engineer">Cloud / DevOps Engineer</option>
+                <option value="Embedded / IoT Engineer">Embedded / IoT Engineer</option>
+                <option value="Blockchain Developer">Blockchain Developer</option>
+                <option value="Quality Assurance / Tester">Quality Assurance / Tester</option>
+                <option value="Technical Writer">Technical Writer</option>
+                <option value="Project Manager">Project Manager</option>
+            </select>
+        </div>
+
+        <!-- Resume Upload -->
+        <div class="form-group">
+            <label for="resume_file">Upload Your Resume (PDF / DOCX)</label>
+            <input type="file" name="resume_file" id="resume_file" accept=".pdf,.docx" required>
+        </div>
+
+        <button type="submit">Analyze Resume →</button>
+    </form>
+</div>
+
+</body>
+</html>
+

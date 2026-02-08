@@ -1,0 +1,803 @@
+                                                                                    H2
+
+app.py
+
+
+
+from flask import Flask, render_template, request
+import os
+from PyPDF2 import PdfReader
+from docx import Document
+
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# ---------------- S1: Domain Suggestion ----------------
+def suggest_domain(interest, skills):
+    mapping = {
+        "design": "UI/UX Designer",
+        "data": "Data Analyst / Data Scientist",
+        "security": "Cyber Security Engineer",
+        "management": "Product / Business Analyst",
+        "development": "Software Developer"
+    }
+    return mapping.get(interest, "Software Developer")
+
+# ---------------- S2: Roadmap ----------------
+def get_roadmap(domain):
+    roadmaps = {
+        "UI/UX Designer": """
+        <ul>
+            <li>Learn UI/UX fundamentals</li>
+            <li>Master Figma & Wireframing</li>
+            <li>Build portfolio projects</li>
+        </ul>
+        """,
+        "Software Developer": """
+        <ul>
+            <li>Master DSA & Algorithms</li>
+            <li>Learn backend development</li>
+            <li>Build real-world projects</li>
+        </ul>
+        """,
+        "Cyber Security Engineer": """
+        <ul>
+            <li>Networking & Linux</li>
+            <li>Security fundamentals</li>
+            <li>Hands-on labs (TryHackMe)</li>
+        </ul>
+        """,
+        "Data Analyst / Data Scientist": """
+        <ul>
+            <li>Python & SQL</li>
+            <li>Statistics & ML basics</li>
+            <li>Data projects</li>
+        </ul>
+        """,
+        "Product / Business Analyst": """
+        <ul>
+            <li>Requirement analysis</li>
+            <li>Business case studies</li>
+            <li>Stakeholder communication</li>
+        </ul>
+        """
+    }
+    return roadmaps.get(domain, "<p>Roadmap coming soon.</p>")
+
+# ---------------- S4: Companies ----------------
+def get_companies(domain):
+    companies = {
+        "UI/UX Designer": {
+            "Startups": ["Zerodha", "CRED"],
+            "MNCs": ["Accenture"],
+            "Product": ["Google"]
+        },
+        "Software Developer": {
+            "Startups": ["Swiggy"],
+            "MNCs": ["TCS"],
+            "Product": ["Amazon"]
+        },
+        "Cyber Security Engineer": {
+            "Startups": ["QuickHeal"],
+            "MNCs": ["Deloitte"],
+            "Product": ["CrowdStrike"]
+        },
+        "Data Analyst / Data Scientist": {
+            "Startups": ["Fractal"],
+            "MNCs": ["Capgemini"],
+            "Product": ["Netflix"]
+        },
+        "Product / Business Analyst": {
+            "Startups": ["Flipkart"],
+            "MNCs": ["BCG"],
+            "Product": ["Uber"]
+        }
+    }
+    return companies.get(domain, {})
+
+# ---------------- Resume Utilities ----------------
+def extract_text(path, ext):
+    text = ""
+    if ext == "pdf":
+        reader = PdfReader(path)
+        for page in reader.pages:
+            text += page.extract_text() or ""
+    elif ext == "docx":
+        doc = Document(path)
+        for para in doc.paragraphs:
+            text += para.text
+    return text.lower()
+
+# ---------------- H1: Job Market Skill Weights ----------------
+JOB_MARKET_WEIGHTS = {
+    "UI/UX Designer": {
+        "figma": 0.30,
+        "ux": 0.25,
+        "prototype": 0.20,
+        "wireframe": 0.15,
+        "ui": 0.10
+    },
+    "Software Developer": {
+        "dsa": 0.30,
+        "algorithm": 0.25,
+        "python": 0.20,
+        "java": 0.15,
+        "git": 0.10
+    },
+    "Cyber Security Engineer": {
+        "network": 0.30,
+        "linux": 0.25,
+        "security": 0.20,
+        "firewall": 0.15,
+        "penetration": 0.10
+    },
+    "Data Analyst / Data Scientist": {
+        "python": 0.30,
+        "sql": 0.25,
+        "statistics": 0.20,
+        "machine learning": 0.15,
+        "data": 0.10
+    },
+    "Product / Business Analyst": {
+        "requirement": 0.30,
+        "analysis": 0.25,
+        "business": 0.20,
+        "stakeholder": 0.15,
+        "case study": 0.10
+    }
+}
+
+# ---------------- S3 + S5 + H1 ----------------
+def analyze_resume(text, role):
+    role_skills = list(JOB_MARKET_WEIGHTS.get(role, {}).keys())
+
+    matched = [s for s in role_skills if s in text]
+    missing = [s for s in role_skills if s not in text]
+
+    if not matched:
+        return (
+            [],
+            0,
+            "Beginner",
+            missing,
+            ["⚠️ Focus on foundational skills for this role"]
+        )
+
+    weights = JOB_MARKET_WEIGHTS.get(role, {})
+    score = int(sum(weights[s] for s in matched if s in weights) * 100)
+
+    if score >= 80:
+        level = "Ready for Interview"
+    elif score >= 50:
+        level = "Intermediate"
+    else:
+        level = "Beginner"
+
+    feedback = []
+
+    if missing:
+        feedback.append("⚠️ Focus on high-demand market skills")
+    else:
+        feedback.append("✅ Strong skill alignment with current job market")
+
+    return matched, score, level, missing, feedback
+
+# ---------------- M1 + H1: Skill Prioritization ----------------
+def prioritize_skills(role, missing_skills):
+    weights = JOB_MARKET_WEIGHTS.get(role, {})
+    ranked = sorted(
+        missing_skills,
+        key=lambda skill: weights.get(skill, 0),
+        reverse=True
+    )
+    return ranked
+
+# ---------------- M3: Career Outcome Engine ----------------
+def career_outcome(role, level):
+    outcomes = {
+        "Beginner": {
+            "category": "Internships & Entry-Level",
+            "strategy": "Build fundamentals & projects"
+        },
+        "Intermediate": {
+            "category": "Service & Mid-size Companies",
+            "strategy": "Upskill and apply for full-time roles"
+        },
+        "Ready for Interview": {
+            "category": "Product Companies & MNCs",
+            "strategy": "Mock interviews & referrals"
+        }
+    }
+    return outcomes.get(level, {})
+
+# ---------------- H2: Closed-Loop Adaptive Engine ----------------
+def adaptive_strategy(level, interview_feedback, project_feedback):
+    strategy = {
+        "reduce_focus": [],
+        "increase_focus": [],
+        "actions": []
+    }
+
+    # Interview-based adaptation
+    if interview_feedback == "poor_communication":
+        strategy["increase_focus"].append("Explain projects clearly")
+        strategy["actions"].append("Practice mock interviews")
+        strategy["actions"].append("Revise project storytelling")
+
+    if interview_feedback == "weak_concepts":
+        strategy["increase_focus"].append("Core fundamentals")
+        strategy["actions"].append("Revise theory before coding")
+
+    # Project-based adaptation
+    if project_feedback == "weak_projects":
+        strategy["increase_focus"].append("Hands-on projects")
+        strategy["actions"].append("Refine existing projects")
+        strategy["actions"].append("Add real-world use cases")
+
+    if level == "Ready for Interview":
+        strategy["reduce_focus"].append("New skill acquisition")
+        strategy["actions"].append("Focus on interviews & referrals")
+
+    return strategy
+
+
+# ---------------- Routes ----------------
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/career")
+def career():
+    return render_template("career.html")
+
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    domain = suggest_domain(
+        request.form.get("interest"),
+        request.form.getlist("skills")
+    )
+    return render_template(
+        "result.html",
+        domain=domain,
+        roadmap=get_roadmap(domain),
+        companies=get_companies(domain)
+    )
+
+@app.route("/resume")
+def resume():
+    return render_template("resume.html")
+
+@app.route("/review_resume", methods=["POST"])
+def review_resume():
+    role = request.form.get("target_role")
+    file = request.files.get("resume_file")
+
+    ext = file.filename.split(".")[-1]
+    path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    file.save(path)
+
+    text = extract_text(path, ext)
+
+    matched, score, level, missing, feedback = analyze_resume(text, role)
+    priority_skills = prioritize_skills(role, missing)
+    outcome = career_outcome(role, level)
+
+    # -------- H2 SIMULATED FEEDBACK --------
+    interview_feedback = "poor_communication" if score < 70 else "good"
+    project_feedback = "weak_projects" if len(priority_skills) > 3 else "good"
+
+    adaptive_plan = adaptive_strategy(
+        level,
+        interview_feedback,
+        project_feedback
+    )
+
+    return render_template(
+        "resume_result.html",
+        role=role,
+        feedback=feedback,
+        score=score,
+        level=level,
+        priority_skills=priority_skills,
+        outcome=outcome,
+        adaptive_plan=adaptive_plan
+    )
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+
+
+index.html
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Career Planner</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="landing">
+    <h1>The <span>AI-Powered</span> Career Planning Platform</h1>
+
+    <p>
+        Confused about your career path?<br>
+        Our AI system helps you choose the right domain,
+        plan your preparation, and approach placements with confidence.
+    </p>
+
+    <a href="/career" class="primary-btn">Get Started</a>
+</div>
+
+</body>
+</html>
+
+
+
+
+career.html
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Career Guidance</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="career-page">
+    <h2>Career Guidance</h2>
+
+    <form action="/analyze" method="POST">
+        <label>Primary Interest</label>
+        <select name="interest" required>
+            <option value="">Select</option>
+            <option value="design">Design / Creativity</option>
+            <option value="data">Data & Analytics</option>
+            <option value="security">Cyber Security</option>
+            <option value="management">Management</option>
+            <option value="development">Programming</option>
+        </select>
+
+        <label>Your Skills</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="skills" value="html"> HTML</label>
+            <label><input type="checkbox" name="skills" value="css"> CSS</label>
+            <label><input type="checkbox" name="skills" value="python"> Python</label>
+            <label><input type="checkbox" name="skills" value="sql"> SQL</label>
+            <label><input type="checkbox" name="skills" value="communication"> Communication</label>
+        </div>
+
+        <button type="submit" class="primary-btn">Analyze</button>
+    </form>
+</div>
+
+</body>
+</html>
+
+
+
+
+result.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Career Result</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="result-wrapper">
+
+    <h2 class="result-title">Suggested Career Domain</h2>
+    <h1 class="domain-name">{{ domain }}</h1>
+
+    <!-- Roadmap -->
+    <div class="roadmap-box">
+        {{ roadmap | safe }}
+    </div>
+
+    <!-- Companies Hiring -->
+    <div class="company-box">
+        <h2>Companies Hiring for This Role</h2>
+
+        {% for category, company_list in companies.items() %}
+            <h3>{{ category }}</h3>
+            <ul>
+                {% for company in company_list %}
+                    <li>{{ company }}</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div>
+
+    <!-- Resume Analyzer -->
+    <a href="/resume" class="primary-btn" style="margin-top:30px;display:inline-block;">
+        Analyze My Resume →
+    </a>
+
+    <br><br>
+
+    <a href="/career" class="secondary-btn">← Try Again</a>
+
+</div>
+
+</body>
+</html>
+
+
+resume.html
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Analyzer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="career-page">
+    <h2>Resume Analyzer</h2>
+
+    <form action="/review_resume" method="POST" enctype="multipart/form-data">
+        <label>Target Role</label>
+        <select name="target_role" required>
+            <option value="">Select Role</option>
+            <option value="UI/UX Designer">UI/UX Designer</option>
+            <option value="Software Developer">Software Developer</option>
+            <option value="Data Analyst / Data Scientist">Data Analyst / Data Scientist</option>
+            <option value="Cyber Security Engineer">Cyber Security Engineer</option>
+            <option value="Product / Business Analyst">Product / Business Analyst</option>
+        </select>
+
+        <label>Upload Resume (PDF or DOCX)</label>
+        <input type="file" name="resume_file" accept=".pdf,.docx" required>
+
+        <button type="submit" class="primary-btn">Review Resume</button>
+    </form>
+</div>
+</body>
+</html>
+
+
+
+resume_result.html
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Analysis Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            padding: 40px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+        h1 {
+            color: #6c3cff;
+        }
+        .box {
+            background: #f1f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        ul {
+            margin-left: 20px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #6c3cff;
+            color: white;
+            font-size: 14px;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 20px;
+            background: #6c3cff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Resume Analysis for {{ role }}</h1>
+
+    <p><strong>Readiness Level:</strong> <span class="badge">{{ level }}</span></p>
+    <p><strong>Score:</strong> {{ score }}/100</p>
+
+    <!-- Feedback -->
+    <div class="box">
+        <h3>Feedback</h3>
+        <ul>
+            {% for msg in feedback %}
+                <li>{{ msg }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Skill Prioritization -->
+    {% if priority_skills %}
+    <div class="box">
+        <h3>🔥 Skills You Should Learn Next</h3>
+        <ol>
+            {% for skill in priority_skills %}
+                <li>{{ skill | upper }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    <!-- Career Outcome (M3) -->
+    {% if outcome %}
+    <div class="box">
+        <h3>🎯 Career Outcome Insight</h3>
+        <p><strong>Target Category:</strong> {{ outcome.category }}</p>
+        <p><strong>Strategy:</strong> {{ outcome.strategy }}</p>
+    </div>
+    {% endif %}
+
+    {% if adaptive_plan %}
+<div class="box">
+    <h3>🔁 Adaptive Preparation Strategy </h3>
+
+    {% if adaptive_plan.increase_focus %}
+    <p><strong>📈 Increased Focus Areas:</strong></p>
+    <ul>
+        {% for item in adaptive_plan.increase_focus %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if adaptive_plan.reduce_focus %}
+    <p><strong>📉 Reduced Focus Areas:</strong></p>
+    <ul>
+        {% for item in adaptive_plan.reduce_focus %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p><strong>🧠 Recommended Actions:</strong></p>
+    <ul>
+        {% for act in adaptive_plan.actions %}
+        <li>{{ act }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
+    <a href="/resume" class="btn">← Try Another Resume</a>
+</div>
+
+</body>
+</html>
+
+
+
+style.css
+
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #f9f5ff, #eef2ff);
+    color: #1f2937;
+}
+
+/* LANDING PAGE */
+.landing {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+}
+
+.landing h1 {
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.landing h1 span {
+    color: #7c3aed;
+}
+
+.landing p {
+    font-size: 20px;
+    max-width: 720px;
+    line-height: 1.7;
+    margin-bottom: 45px;
+    color: #4b5563;
+}
+
+/* BUTTONS */
+.primary-btn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 16px 34px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+}
+
+/* CAREER PAGE */
+.career-page, .result-wrapper {
+    max-width: 800px;
+    margin: 60px auto;
+    background: white;
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.career-page h2, .result-wrapper h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #7c3aed;
+}
+
+/* FORM */
+form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.checkbox-group label {
+    font-weight: 500;
+}
+
+/* ROADMAP */
+.roadmap-box {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f5f3ff;
+    border-radius: 12px;
+}
+
+.roadmap-box h3 {
+    margin-top: 15px;
+    color: #6d28d9;
+}
+
+.roadmap-box ul {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.roadmap-box li {
+    margin-bottom: 6px;
+}
+
+/* CENTER BUTTON */
+form button {
+    display: block;
+    margin: 30px auto 0 auto;
+}
+.company-box {
+    margin-top: 35px;
+    padding: 25px;
+    background: #eef2ff;
+    border-radius: 14px;
+}
+
+.company-box h2 {
+    color: #7c3aed;
+    margin-bottom: 15px;
+}
+
+.company-box h3 {
+    margin-top: 15px;
+    color: #4c1d95;
+}
+
+.company-box ul {
+    margin-left: 20px;
+}
+
+.company-box li {
+    margin-bottom: 6px;
+}
+
+
+
+
+
+main.js
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("careerForm");
+    const resultBox = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault(); // prevent reload
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch("/analyze", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            resultBox.innerHTML = `
+                <h3>Suggested Career Domain:</h3>
+                <h2>${data.domain}</h2>
+                <div class="roadmap-box">${data.roadmap}</div>
+            `;
+        } catch (err) {
+            resultBox.innerHTML = `<p style="color:red;">Error fetching results. Please try again.</p>`;
+            console.error(err);
+        }
+    });
+});
+
+
+

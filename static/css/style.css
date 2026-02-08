@@ -1,0 +1,190 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #f9f5ff, #eef2ff);
+    color: #1f2937;
+}
+
+/* LANDING PAGE */
+.landing {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+}
+
+.landing h1 {
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.landing h1 span {
+    color: #7c3aed;
+}
+
+.landing p {
+    font-size: 20px;
+    max-width: 720px;
+    line-height: 1.7;
+    margin-bottom: 45px;
+    color: #4b5563;
+}
+
+/* BUTTONS */
+.primary-btn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 16px 34px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+}
+
+/* CAREER PAGE */
+.career-page, .result-wrapper {
+    max-width: 800px;
+    margin: 60px auto;
+    background: white;
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.career-page h2, .result-wrapper h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #7c3aed;
+}
+
+/* FORM */
+form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.checkbox-group label {
+    font-weight: 500;
+}
+
+/* ROADMAP */
+.roadmap-box {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f5f3ff;
+    border-radius: 12px;
+}
+
+.roadmap-box h3 {
+    margin-top: 15px;
+    color: #6d28d9;
+}
+
+.roadmap-box ul {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.roadmap-box li {
+    margin-bottom: 6px;
+}
+
+/* CENTER BUTTON */
+form button {
+    display: block;
+    margin: 30px auto 0 auto;
+}
+.company-box {
+    margin-top: 35px;
+    padding: 25px;
+    background: #eef2ff;
+    border-radius: 14px;
+}
+
+.company-box h2 {
+    color: #7c3aed;
+    margin-bottom: 15px;
+}
+
+.company-box h3 {
+    margin-top: 15px;
+    color: #4c1d95;
+}
+
+.company-box ul {
+    margin-left: 20px;
+}
+
+.company-box li {
+    margin-bottom: 6px;
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+.badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: linear-gradient(45deg,#7c3aed,#4f46e5);
+    color: white;
+    font-weight: 600;
+}
+.progress-bar {
+    height: 16px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    overflow: hidden;
+    margin-top: 6px;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg,#7c3aed,#4f46e5);
+    width: 0%;
+    transition: width 1s ease;
+}
+
+
+
